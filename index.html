@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>/enomatic</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #33ff33;
+      font-family: 'Courier New', monospace;
+      margin: 0;
+      padding: 0;
+    }
+
+    #container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #loginPage, #chatPage {
+      max-width: 600px;
+      width: 90%;
+      padding: 20px;
+      background-color: #000;
+      border: 2px solid #33ff33;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    input, button {
+      font-family: 'Courier New', monospace;
+      background: none;
+      border: none;
+      border-bottom: 2px solid #33ff33;
+      color: #33ff33;
+      padding: 10px;
+      margin: 10px 0;
+      width: calc(100% - 20px);
+      box-sizing: border-box;
+    }
+
+    input:focus, button:focus {
+      outline: none;
+    }
+
+    #messages {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #33ff33;
+      padding: 10px;
+      margin-top: 20px;
+      background-color: #000;
+      border-radius: 5px;
+    }
+
+    p {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="loginPage">
+      <h2 style="color: #33ff33;">Welcome to /enomatic</h2>
+      <label for="username">NAME =</label>
+      <input type="text" id="username">
+      <button onclick="joinChat()">-join</button>
+    </div>
+    
+    <div id="chatPage" style="display: none;">
+      <div id="messages"></div>
+      <input type="text" id="messageInput" placeholder="-type your message here ...">
+      <button onclick="sendMessage()">-send</button>
+    </div>
+  </div>
+
+  <!-- Include Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
+    // Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyCfSVjaKk-O9UQjog3SziLh3bVLCAYgXoQ",
+      authDomain: "enomatic-d64e8.firebaseapp.com",
+      projectId: "enomatic-d64e8",
+      storageBucket: "enomatic-d64e8.appspot.com",
+      messagingSenderId: "238514833055",
+      appId: "1:238514833055:web:a29b8e90049298bc1444aa",
+      measurementId: "G-5MFK3150ZL"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    var database = firebase.database();
+    var username;
+    var messagesDiv = document.getElementById('messages');
+
+    function joinChat() {
+      username = document.getElementById('username').value;
+      if (username.trim() !== '') {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('chatPage').style.display = 'block';
+      }
+    }
+
+    function sendMessage() {
+      var messageInput = document.getElementById('messageInput');
+      var message = messageInput.value;
+      if (message.trim() !== '') {
+        var timestamp = new Date().getTime();
+        database.ref('messages/' + timestamp).set({
+          username: username,
+          message: message
+        });
+        messageInput.value = '';
+      }
+    }
+
+    function showMessage(message) {
+      var p = document.createElement('p');
+      p.textContent = message;
+      messagesDiv.appendChild(p);
+    }
+
+    // Listen for new messages
+    database.ref('messages').on('child_added', function(snapshot) {
+      var message = snapshot.val();
+      showMessage(message.username + ": " + message.message);
+    });
+  </script>
+</body>
+</html>
