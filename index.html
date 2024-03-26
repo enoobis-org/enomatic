@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>/enomatic</title>
+  <title>Talkomatic</title>
   <style>
     body {
       background-color: #000;
@@ -70,24 +70,23 @@
 <body>
   <div id="container">
     <div id="loginPage">
-      <h2 style="color: #33ff33;">Welcome to /enomatic</h2>
-      <label for="username">NAME =</label>
+      <h2 style="color: #33ff33;">Welcome to Talkomatic!</h2>
+      <label for="username">Name:</label>
       <input type="text" id="username">
-      <button onclick="joinChat()">-join</button>
+      <button onclick="joinChat()">Join</button>
     </div>
     
     <div id="chatPage" style="display: none;">
       <div id="messages"></div>
-      <input type="text" id="messageInput" placeholder="-type your message here ...">
-      <button onclick="sendMessage()">-send</button>
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <button onclick="sendMessage()">Send</button>
     </div>
   </div>
 
-  <!-- Include Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script>
-    // Firebase configuration
+    
     var firebaseConfig = {
       apiKey: "AIzaSyCfSVjaKk-O9UQjog3SziLh3bVLCAYgXoQ",
       authDomain: "enomatic-d64e8.firebaseapp.com",
@@ -97,8 +96,7 @@
       appId: "1:238514833055:web:a29b8e90049298bc1444aa",
       measurementId: "G-5MFK3150ZL"
     };
-
-    // Initialize Firebase
+    
     firebase.initializeApp(firebaseConfig);
 
     var database = firebase.database();
@@ -120,7 +118,8 @@
         var timestamp = new Date().getTime();
         database.ref('messages/' + timestamp).set({
           username: username,
-          message: message
+          message: message,
+          timestamp: timestamp
         });
         messageInput.value = '';
       }
@@ -132,10 +131,14 @@
       messagesDiv.appendChild(p);
     }
 
-    // Listen for new messages
     database.ref('messages').on('child_added', function(snapshot) {
       var message = snapshot.val();
       showMessage(message.username + ": " + message.message);
+      var currentTime = new Date().getTime();
+      var messageTime = message.timestamp;
+      if (currentTime - messageTime > 300000) {
+        snapshot.ref.remove();
+      }
     });
   </script>
 </body>
